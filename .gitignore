@@ -1,0 +1,20 @@
+# User-specific stuff
+.idea/
+.__pycache__/
+
+*.iml
+*.ipr
+*.iws
+
+# Env file containing tokens and keys
+*.env
+
+# Databases containing private data
+*.db
+*.sqlite
+
+# Log file
+*.log
+
+# large ffmpeg executables
+*.exe
