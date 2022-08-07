@@ -18,21 +18,26 @@ class OnVoiceStateUpdateListener(commands.Cog, name='OnVoiceStateUpdateListener'
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        """makes the bot leave any voice channel if it is alone in there"""
+        """makes the bot leave any voice channel if it is alone in there for over 30 seconds"""
         if not member.guild.voice_client:
             # Exit if the bot is not connected to a voice channel
             return
 
+        on_leave_cooldown = False
         if len(member.guild.voice_client.channel.members) == 1:
             # The bot is the only one in the voice channel
             # Wait 30 seconds before checking again, then leave the voice channel
-            await asyncio.sleep(30)
+            if not on_leave_cooldown:    # do not try leaving multiple times, it could cause errors
+                on_leave_cooldown = True
+                await asyncio.sleep(30)
 
-            if len(member.guild.voice_client.channel.members) == 1:
-                if member.guild.voice_client:
-                    if member.guild.voice_client.is_connected():
-                        await member.guild.voice_client.disconnect()
-                        await member.send('I left the voice channel as you were the last person in it and left.')
+                if len(member.guild.voice_client.channel.members) == 1:
+                    if member.guild.voice_client:
+                        if member.guild.voice_client.is_connected():
+                            member.guild.voice_client.stop()
+                            await member.guild.voice_client.disconnect()
+                            on_leave_cooldown = False
+                            await member.send('I left the voice channel as you were the last person in it and left.')
 
 
 # cog related functions

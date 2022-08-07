@@ -26,7 +26,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @commands.group(name='vc', aliases=['voice_call', 'voicecall'],
                     description='command group containing commands for managing the bot regarding voice calls')
     async def vc(self, ctx):
-        """command group containing commands for managing the bot regarding voice calls"""
+        """command group containing commands for managing the bot regarding voice channels"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
 
