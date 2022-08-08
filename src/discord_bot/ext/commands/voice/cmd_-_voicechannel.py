@@ -63,7 +63,8 @@ class VoiceCall(commands.Cog, name='VoiceCall',
         else:
             await ctx.send(f'{ctx.author.mention}, I am not connected to a voice channel.')
 
-    @vc.command(name='toggle_mute', aliases=['toggle_mute'], description='mutes/ unmutes the given user')
+    @vc.command(name='toggle_mute', aliases=['togglemute', 'voice_mute', 'voicemute'],
+                description='mutes/ unmutes the given user')
     @commands.guild_only()
     @commands.has_permissions(mute_members=True)
     async def toggle_mute(self, ctx, member: discord.Member, *, reason):
@@ -81,7 +82,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
                 await member.edit(mute=True, reason=reason)
                 await ctx.send(f'**Muted** {str(member)} for reason: \n```{reason}```')
 
-    @vc.command(name='toggle_deafen', aliases=['toggle_deafen'], description='deafens/ undeafens the given user')
+    @vc.command(name='toggle_deafen', aliases=['toggledeafen', 'deafen'], description='deafens/ undeafens the given user')
     @commands.guild_only()
     @commands.has_permissions(deafen_members=True)
     async def toggle_deafen(self, ctx, member: discord.Member, *, reason):
