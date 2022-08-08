@@ -128,6 +128,8 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # ------
 
     @commands.command(name='play_local', help='appends a local audio file to the queue and starts playing')
+    @commands.guild_only()
+    @commands.is_owner()
     async def play_local(self, ctx, *, path_to_audio_file: str):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
@@ -162,6 +164,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # ------
 
     @commands.command(name='play', help='appends the soundtrack of a youtube video to the queue and starts playing')
+    @commands.guild_only()
     async def play(self, ctx, *, query):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
@@ -191,12 +194,14 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                                'the given search query. Maybe it is a livestream or playlist. I can not play those.')
 
     @commands.command(name='resume', help='if the bot has been paused, start playing from where it did')
+    @commands.guild_only()
     async def resume(self, ctx):
         if self.voice_client:
             if self.voice_client.is_paused():
                 self.voice_client.resume()
 
     @commands.command(name='pause', help='if the bot is currently playing, pause it')
+    @commands.guild_only()
     async def pause(self, ctx):
         if self.voice_client:
             if self.voice_client.is_playing():
@@ -204,6 +209,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
 
     @commands.command(name='stop', help='make the bot stop playing any music, '
                                         'clear the queue and leave the voice channel')
+    @commands.guild_only()
     async def stop(self, ctx):
         if self.voice_client:
             if self.voice_client.is_playing():
@@ -218,6 +224,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # ------
 
     @commands.command(name='queue', help='appends the soundtrack of a youtube video to the queue')
+    @commands.guild_only()
     async def queue(self, ctx, *, query):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
@@ -235,6 +242,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                 await ctx.send(f'Appended to the queue: **{song["title"]}**')
 
     @commands.command(name='skip', help='Skips the current song being played')
+    @commands.guild_only()
     async def skip(self, ctx):
         if self.voice_client:
             self.voice_client.stop()
@@ -242,6 +250,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
             await self.play_music(ctx)
 
     @commands.command(name='clear_queue', aliases=['clearqueue'], help='clears the queue')
+    @commands.guild_only()
     async def clear_queue(self, ctx):
         self.music_queue = []
 
@@ -249,6 +258,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
 
     @commands.command(name='display_queue', aliases=['displayqueue'],
                       help='displays up to 10 songs that will be played next')
+    @commands.guild_only()
     async def display_queue(self, ctx):
         global embedColor
         time = datetime.now()
@@ -291,6 +301,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # ------
 
     @commands.command(name='volume', help='changes the audio sources volume')
+    @commands.guild_only()
     async def volume(self, ctx, new_volume: int):
         """changes the audio sources volume"""
         if self.voice_client:
