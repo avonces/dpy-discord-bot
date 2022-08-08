@@ -1,6 +1,8 @@
 # imports
 import os
 import logging
+
+import discord
 import dotenv
 from discord.ext import commands
 import asyncio
@@ -25,6 +27,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
 
     @commands.group(name='vc', aliases=['voice_call', 'voicecall'],
                     description='command group containing commands for managing the bot regarding voice calls')
+    @commands.guild_only()
     async def vc(self, ctx):
         """command group containing commands for managing the bot regarding voice channels"""
         if ctx.invoked_subcommand is None:
@@ -32,6 +35,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
 
     @vc.command(name='join', aliases=['connect'],
                 description='makes the bot join the voice channel that the author is currently connected to')
+    @commands.guild_only()
     async def join(self, ctx):
         """makes the bot join the voice channel that the author is currently connected to"""
         if ctx.author.voice and ctx.author.voice.channel:
@@ -44,6 +48,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
 
     @vc.command(name='leave', aliases=['disconnect'],
                 description='makes the bot leave any voice channel it is connected to')
+    @commands.guild_only()
     async def leave(self, ctx):
         """makes the bot leave any voice channel it is connected to"""
         if ctx.guild.voice_client:
@@ -57,6 +62,48 @@ class VoiceCall(commands.Cog, name='VoiceCall',
                 await ctx.send(f'{ctx.author.mention}, I am not connected to a voice channel.')
         else:
             await ctx.send(f'{ctx.author.mention}, I am not connected to a voice channel.')
+
+    @vc.command(name='toggle_mute', aliases=['toggle_mute'], description='mutes/ unmutes the given user')
+    @commands.guild_only()
+    @commands.has_permissions(mute_members=True)
+    async def toggle_mute(self, ctx, member: discord.Member, *, reason):
+        """mutes/ unmutes the given user"""
+        if member.voice.mute:
+            await member.edit(mute=False, reason=reason)
+            await ctx.send(f'**Unmuted** {str(member)} for reason: \n```{reason}```')
+
+        else:
+            await member.edit(mute=True, reason=reason)
+            await ctx.send(f'**Muted** {str(member)} for reason: \n```{reason}```')
+
+    @vc.command(name='toggle_deafen', aliases=['toggle_deafen'], description='deafens/ undeafens the given user')
+    @commands.guild_only()
+    @commands.has_permissions(deafen_members=True)
+    async def toggle_deafen(self, ctx, member: discord.Member, *, reason):
+        """deafens/ undeafens the given user"""
+        if member.voice.deaf:
+            await member.edit(deaf=False, reason=reason)
+            await ctx.send(f'**Undeafened** {str(member)} for reason: \n```{reason}```')
+
+        else:
+            await member.edit(deaf=True, reason=reason)
+            await ctx.send(f'**Deafened** {str(member)} for reason: \n```{reason}```')
+
+    @vc.command(name='move', aliases=['move'], description='moves the given user to a given voice call')
+    @commands.guild_only()
+    @commands.has_permissions(move_members=True)
+    async def move(self, ctx, member: discord.Member, channel: discord.VoiceChannel, *, reason):
+        """moves the given user to a given voice call"""
+        await member.move_to(channel=channel, reason=reason)
+        await ctx.send(f'**Moved** {str(member)} to {channel} for reason: \n```{reason}```')
+
+    @vc.command(name='voice_kick', aliases=['voicekick', 'vkick'], description='kicks the given user from a voice call')
+    @commands.guild_only()
+    @commands.has_permissions(kick_members=True)
+    async def voice_kick(self, ctx, member: discord.Member, *, reason):
+        """kicks the given user from a voice call"""
+        await member.move_to(channel=None, reason=reason)
+        await ctx.send(f'**Voice-kicked** {str(member)} for reason: \n```{reason}```')
 
 
 # cog related functions
