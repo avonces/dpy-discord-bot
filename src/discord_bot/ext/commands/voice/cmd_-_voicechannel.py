@@ -68,42 +68,62 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @commands.has_permissions(mute_members=True)
     async def toggle_mute(self, ctx, member: discord.Member, *, reason):
         """mutes/ unmutes the given user"""
-        if member.voice.mute:
-            await member.edit(mute=False, reason=reason)
-            await ctx.send(f'**Unmuted** {str(member)} for reason: \n```{reason}```')
+        if member.top_role >= ctx.author.top_role:
+            await ctx.send(f'{ctx.author.mention}, you can only moderate members '
+                           f'that are blow you in the server hierarchy.')
 
         else:
-            await member.edit(mute=True, reason=reason)
-            await ctx.send(f'**Muted** {str(member)} for reason: \n```{reason}```')
+            if member.voice.mute:
+                await member.edit(mute=False, reason=reason)
+                await ctx.send(f'**Unmuted** {str(member)} for reason: \n```{reason}```')
+
+            else:
+                await member.edit(mute=True, reason=reason)
+                await ctx.send(f'**Muted** {str(member)} for reason: \n```{reason}```')
 
     @vc.command(name='toggle_deafen', aliases=['toggle_deafen'], description='deafens/ undeafens the given user')
     @commands.guild_only()
     @commands.has_permissions(deafen_members=True)
     async def toggle_deafen(self, ctx, member: discord.Member, *, reason):
         """deafens/ undeafens the given user"""
-        if member.voice.deaf:
-            await member.edit(deaf=False, reason=reason)
-            await ctx.send(f'**Undeafened** {str(member)} for reason: \n```{reason}```')
+        if member.top_role >= ctx.author.top_role:
+            await ctx.send(f'{ctx.author.mention}, you can only moderate members '
+                           f'that are blow you in the server hierarchy.')
 
         else:
-            await member.edit(deaf=True, reason=reason)
-            await ctx.send(f'**Deafened** {str(member)} for reason: \n```{reason}```')
+            if member.voice.deaf:
+                await member.edit(deaf=False, reason=reason)
+                await ctx.send(f'**Undeafened** {str(member)} for reason: \n```{reason}```')
+
+            else:
+                await member.edit(deaf=True, reason=reason)
+                await ctx.send(f'**Deafened** {str(member)} for reason: \n```{reason}```')
 
     @vc.command(name='move', aliases=['move'], description='moves the given user to a given voice call')
     @commands.guild_only()
     @commands.has_permissions(move_members=True)
     async def move(self, ctx, member: discord.Member, channel: discord.VoiceChannel, *, reason):
         """moves the given user to a given voice call"""
-        await member.move_to(channel=channel, reason=reason)
-        await ctx.send(f'**Moved** {str(member)} to {channel} for reason: \n```{reason}```')
+        if member.top_role >= ctx.author.top_role:
+            await ctx.send(f'{ctx.author.mention}, you can only moderate members '
+                           f'that are blow you in the server hierarchy.')
+
+        else:
+            await member.move_to(channel=channel, reason=reason)
+            await ctx.send(f'**Moved** {str(member)} to {channel} for reason: \n```{reason}```')
 
     @vc.command(name='voice_kick', aliases=['voicekick', 'vkick'], description='kicks the given user from a voice call')
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     async def voice_kick(self, ctx, member: discord.Member, *, reason):
         """kicks the given user from a voice call"""
-        await member.move_to(channel=None, reason=reason)
-        await ctx.send(f'**Voice-kicked** {str(member)} for reason: \n```{reason}```')
+        if member.top_role >= ctx.author.top_role:
+            await ctx.send(f'{ctx.author.mention}, you can only moderate members '
+                           f'that are blow you in the server hierarchy.')
+
+        else:
+            await member.move_to(channel=None, reason=reason)
+            await ctx.send(f'**Voice-kicked** {str(member)} for reason: \n```{reason}```')
 
 
 # cog related functions
