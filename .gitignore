@@ -18,3 +18,7 @@
 
 # large ffmpeg executables
 *.exe
+
+# audio files which may be copyrighted
+*.mp3
+*.wav

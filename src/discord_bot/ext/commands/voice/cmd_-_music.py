@@ -25,10 +25,17 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
         self.client = client
 
         self.voice_client = None
+
         self.music_queue = []    # [[{'source': url, 'title': title}, channel], ...]
+        self.volume = 1.0    # floating point percentage
+
+        self.valid_file_types = [
+            '.mp3',
+            '.wav'
+        ]
 
         self.YDL_OPTIONS = {
-            'format': 'bestaudio',
+            'format': 'bestaudio/best',
             'noplaylist': 'True'
         }
         self.FFMPEG_OPTIONS = {
@@ -51,21 +58,36 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
         """plays the next song in the queue; if no songs are queued, nothing will be played"""
         if self.music_queue:
             # get the first item (url) in the queue
-            url = self.music_queue[0][0]['source']
+            source = self.music_queue[0][0]['source']
             # then remove it from the queue, so it won't be played forever
             self.music_queue.pop(0)
 
             if self.voice_client.is_connected():    # only try playing if the voice client is connected (recursion)
-                self.voice_client.play(
-                    discord.FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS),
-                    after=lambda e: self.play_next()  # recursion using lambda
-                )
+
+                # do not try to reconnect to a stream when playing local files
+                if source.startswith('http://') or source.startswith('https://'):
+                    self.voice_client.play(
+                        discord.PCMVolumeTransformer(
+                            discord.FFmpegPCMAudio(source, **self.FFMPEG_OPTIONS),
+                            self.volume
+                        ),
+                        after=lambda e: self.play_next()    # recursion using lambda
+                    )
+
+                else:
+                    self.voice_client.play(
+                        discord.PCMVolumeTransformer(
+                            discord.FFmpegPCMAudio(source),
+                            self.volume
+                        ),
+                        after=lambda e: self.play_next()    # recursion using lambda
+                    )
 
     async def play_music(self, ctx):
         """"""
         if self.music_queue:
             # get the first item (url) in the queue
-            m_url = self.music_queue[0][0]['source']
+            source = self.music_queue[0][0]['source']
 
             # try to connect to voice channel if you are not already connected
             if not self.voice_client or not self.voice_client.is_connected():
@@ -81,10 +103,60 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
 
             # then remove the first item (url) in the queue, so it won't be played forever
             self.music_queue.pop(0)
-            self.voice_client.play(
-                discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS),
-                after=lambda e: self.play_next()    # recursion using lambda
-            )
+
+            # do not try to reconnect to a stream when playing local files
+            if source.startswith('http://') or source.startswith('https://'):
+                self.voice_client.play(
+                    discord.PCMVolumeTransformer(
+                        discord.FFmpegPCMAudio(source, **self.FFMPEG_OPTIONS),
+                        self.volume
+                    ),
+                    after=lambda e: self.play_next()
+                )
+
+            else:
+                self.voice_client.play(
+                    discord.PCMVolumeTransformer(
+                        discord.FFmpegPCMAudio(source),
+                        self.volume
+                    ),
+                    after=lambda e: self.play_next()
+                )
+
+    # ------
+    # play_local
+    # ------
+
+    @commands.command(name='play_local', help='appends a local audio file to the queue and starts playing')
+    async def play_local(self, ctx, *, path_to_audio_file: str):
+        if not ctx.author.voice.channel:
+            # you need to be connected so that the bot knows where to go
+            await ctx.send(
+                f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!')
+
+        else:
+            if os.path.exists(path_to_audio_file) and os.path.splitext(path_to_audio_file)[-1] in self.valid_file_types:
+                song = {'source': path_to_audio_file, 'title': os.path.basename(path_to_audio_file)}
+                logger.info(song)
+
+                self.music_queue.append([song, ctx.author.voice.channel])
+                await ctx.send(f'Appended to the queue: **{song["title"]}**')
+
+                if self.voice_client:
+                    if self.voice_client.is_paused():
+                        # resume if paused
+                        await self.resume(ctx)
+                    elif self.voice_client.is_playing():
+                        pass
+
+                    else:
+                        await self.play_music(ctx)
+                else:
+                    await self.play_music(ctx)
+
+            else:
+                await ctx.send(f'{ctx.author.mention}, I was not able to find a valid audio file '
+                               'in the given location.')
 
     # ------
     # play, resume, pause, stop
@@ -170,7 +242,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
             # try to play next in the queue if it exists
             await self.play_music(ctx)
 
-    @commands.command(name='clear_queue', aliases=['clearqueue'], help='Stops the music and clears the queue')
+    @commands.command(name='clear_queue', aliases=['clearqueue'], help='clears the queue')
     async def clear_queue(self, ctx):
         self.music_queue = []
 
@@ -214,6 +286,26 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
         embed.set_thumbnail(url=ctx.author.avatar_url)
 
         await ctx.send(embed=embed)
+
+    # ------
+    # volume
+    # ------
+
+    @commands.command(name='volume', help='changes the audio sources volume')
+    async def volume(self, ctx, new_volume: int):
+        """changes the audio sources volume"""
+        if self.voice_client:
+            if self.voice_client.source:
+                if 0 <= new_volume <= 100:
+                    new_volume_float = new_volume / 100
+
+                    self.volume = new_volume_float
+                    self.voice_client.source.volume = new_volume_float
+
+                    await ctx.channel.send(f'Set the volume to **{new_volume}%**.')
+
+                else:
+                    await ctx.channel.send('Please enter a volume between 0 and 100.')
 
 
 # cog related functions
