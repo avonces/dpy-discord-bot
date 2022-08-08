@@ -137,7 +137,6 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
         else:
             if os.path.exists(path_to_audio_file) and os.path.splitext(path_to_audio_file)[-1] in self.valid_file_types:
                 song = {'source': path_to_audio_file, 'title': os.path.basename(path_to_audio_file)}
-                logger.info(song)
 
                 self.music_queue.append([song, ctx.author.voice.channel])
                 await ctx.send(f'Appended to the queue: **{song["title"]}**')
