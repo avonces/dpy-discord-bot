@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from datetime import datetime
 
 
@@ -35,13 +35,15 @@ class Misc(commands.Cog, name='Miscellaneous', description='contains a variety o
         self.topic_list = get_list_from_file('../../data/lists/list-topic.txt')
 
     # file command
-    @commands.command(name='sendfile', description='sends a local file using the given path')
+    @bridge.bridge_command(name='sendfile', description='sends a local file using the given path')
     @commands.is_owner()
-    async def sendfile(self, ctx: commands.Context, path_to_file):
+    async def sendfile(self, ctx: bridge.BridgeContext, path_to_file: str):
         """sends a local file using the given path"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
+
+        await ctx.defer()
 
         # get file
         filename = os.path.basename(path_to_file)
@@ -52,11 +54,11 @@ class Misc(commands.Cog, name='Miscellaneous', description='contains a variety o
                               description=filename,
                               color=embedColor)
         embed.set_image(url=f'attachment://{filename}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
-        await ctx.send(file=file, embed=embed)
+        await ctx.respond(file=file, embed=embed)
 
 
 # cog related functions

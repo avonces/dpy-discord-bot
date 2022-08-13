@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import requests
 from datetime import datetime
 
@@ -27,42 +27,43 @@ class Meme(commands.Cog, name='Meme', description='contains meme command'):
 
         self.request_session = requests.Session()
 
-    @commands.command(name='meme', description='sends a random meme')
-    async def meme(self, ctx):
+    @bridge.bridge_command(name='meme', description='sends a random meme')
+    async def meme(self, ctx: bridge.BridgeContext):
         """sends a random meme"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
 
-        async with ctx.typing():
-            # do request
-            request_url = f'https://apis.duncte123.me/meme'
-            headers = {'User-Agent': str(self.client.user)}
-            data = self.request_session.get(request_url, headers=headers).json()
+        await ctx.defer()
 
-            # if request succeeded, send embed with image
-            if data['success']:
-                meme_url = data['data']['url']
-                title = data['data']['title']
-                body = data['data']['body']
-                image_url = data['data']['image']
+        # do request
+        request_url = f'https://apis.duncte123.me/meme'
+        headers = {'User-Agent': str(self.client.user)}
+        data = self.request_session.get(request_url, headers=headers).json()
 
-                embed = discord.Embed(title=title,
-                                      url=meme_url,
-                                      description=body,
-                                      color=embedColor)
-                embed.set_image(url=image_url)
+        # if request succeeded, send embed with image
+        if data['success']:
+            meme_url = data['data']['url']
+            title = data['data']['title']
+            body = data['data']['body']
+            image_url = data['data']['image']
 
-            else:
-                embed = discord.Embed(title='Meme',
-                                      description='Unfortunately, an api error occurred.',
-                                      color=embedColor)
+            embed = discord.Embed(title=title,
+                                  url=meme_url,
+                                  description=body,
+                                  color=embedColor)
+            embed.set_image(url=image_url)
 
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
-            embed.set_footer(text=f'BerbBot - {formatted_time}')
+        else:
+            embed = discord.Embed(title='Meme',
+                                  description='Unfortunately, an api error occurred.',
+                                  color=embedColor)
 
-        await ctx.send(embed=embed)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_footer(text=f'BerbBot - {formatted_time}')
+
+        await ctx.respond(embed=embed)
 
 
 # cog related functions

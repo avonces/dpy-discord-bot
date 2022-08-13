@@ -35,7 +35,9 @@ class CustomHelpCommand(commands.HelpCommand):
 
         # design embed
         embed = discord.Embed(title='Help - Bot',
-                              description='An overview of all available commands\n',
+                              description='**An overview of all available commands**\n'
+                                          'If a command is listed twice, there are a prefixed command and '
+                                          'a slash command with the same name.\n',
                               color=embedColor)
 
         embed.set_footer(text=f'BerbBot - {formatted_time}')

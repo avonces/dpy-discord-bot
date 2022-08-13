@@ -5,7 +5,7 @@ import logging
 from logging import config
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from custom_help_command import CustomHelpCommand
 import sqlite3
 import ast
@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 # dotenv
 """import secrets and vars from .env file because of security and configuration reasons"""
 dotenv.load_dotenv()
-discordToken = os.getenv('DISCORD_TOKEN')
 
 defaultPrefixes = ast.literal_eval(os.getenv('DEFAULT_PREFIXES'))   # string needs to be converted to list
 
@@ -77,11 +76,14 @@ def get_prefix(client, message):
 # create bot
 """create the client (bot)"""
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix=get_prefix,
-                      strip_after_prefix=True,
-                      case_insensitive=True,
-                      intents=intents,
-                      help_command=CustomHelpCommand())
+client = bridge.Bot(
+    command_prefix=get_prefix,
+    strip_after_prefix=True,
+    case_insensitive=True,
+    intents=intents,
+    help_command=CustomHelpCommand(),
+    debug_guilds=[967030034240012328]
+)
 
 
 # define main function for running bot
@@ -112,7 +114,7 @@ def main():
     # run
     logger.info('executing...')
     """run the code and start the client"""
-    client.run(discordToken)
+    client.run(os.getenv('DISCORD_TOKEN'))
 
 
 if __name__ == '__main__':

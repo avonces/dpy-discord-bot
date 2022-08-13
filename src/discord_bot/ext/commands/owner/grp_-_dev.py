@@ -4,7 +4,7 @@ import logging
 import dotenv
 import asyncio
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from datetime import datetime
 
 # logging
@@ -24,16 +24,17 @@ class Development(commands.Cog, name='Development', description='contains develo
     def __init__(self, client):
         self.client = client
 
+    # TODO: Bridge groups not working
     @commands.group(name='dev', description='command group containing development-related commands')
     @commands.is_owner()
-    async def dev(self, ctx):
+    async def dev(self, ctx: commands.Context):
         """creates a command group "dev" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
 
     @dev.command(name='shutdown', description='shuts down the bot')
     @commands.is_owner()
-    async def shutdown(self, ctx):
+    async def shutdown(self, ctx: commands.Context):
         """shuts down the bot"""
         # send info/ embed
         global embedColor
@@ -52,9 +53,9 @@ class Development(commands.Cog, name='Development', description='contains develo
         # shut down client
         await ctx.bot.close()
 
-    @dev.command(name='listext', description='sends a list of all available extensions')
+    @dev.command(name='list_ext', aliases=['listext'], description='sends a list of all available extensions')
     @commands.is_owner()
-    async def listext(self, ctx):
+    async def list_ext(self, ctx: commands.Context):
         """sends a list of all available extensions (.py files in the /ext directory)"""
         global embedColor
         time = datetime.now()
@@ -64,9 +65,9 @@ class Development(commands.Cog, name='Development', description='contains develo
         embed = discord.Embed(title='Extensions',
                               description='a list of all available extensions (.py files in the /ext directory)\n',
                               color=embedColor)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         # add content
@@ -84,9 +85,9 @@ class Development(commands.Cog, name='Development', description='contains develo
 
         await ctx.send(embed=embed)
 
-    @dev.command(name='reloadext', description='reloads an extension.py')
+    @dev.command(name='reload_ext', aliases=['reloadext'], description='reloads an extension.py')
     @commands.is_owner()
-    async def reloadext(self, ctx, extension_name):
+    async def reload_ext(self, ctx: commands.Context, extension_name: str):
         """reloads an extension.py"""
         global embedColor
         time = datetime.now()
@@ -102,8 +103,8 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed = discord.Embed(title=f'Reloaded',
                                   description=f'`{extension_name}` has been reloaded successfully!',
                                   color=embedColor)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
@@ -119,15 +120,15 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed.add_field(name='Error: ',
                             value=f'```{error}```',
                             inline=False)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
 
-    @dev.command(name='loadext', description='loads an extension.py')
+    @dev.command(name='load_ext', aliases=['loadext'], description='loads an extension.py')
     @commands.is_owner()
-    async def loadext(self, ctx, extension_name):
+    async def load_ext(self, ctx: commands.Context, extension_name: str):
         """loads an extension.py"""
         global embedColor
         time = datetime.now()
@@ -142,8 +143,8 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed = discord.Embed(title=f'Loaded',
                                   description=f'`{extension_name}` has been loaded successfully!',
                                   color=embedColor)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
@@ -159,15 +160,15 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed.add_field(name='Error: ',
                             value=f'```{error}```',
                             inline=False)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
 
-    @dev.command(name='unloadext', description='unloads an extension.py')
+    @dev.command(name='unload_ext', aliases=['unloadext'], description='unloads an extension.py')
     @commands.is_owner()
-    async def unloadext(self, ctx, extension_name):
+    async def unload_ext(self, ctx: commands.Context, extension_name: str):
         """unloads an extension.py"""
         global embedColor
         time = datetime.now()
@@ -182,8 +183,8 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed = discord.Embed(title=f'Unloaded',
                                   description=f'`{extension_name}` has been unloaded successfully!',
                                   color=embedColor)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
@@ -199,14 +200,15 @@ class Development(commands.Cog, name='Development', description='contains develo
             embed.add_field(name='Error: ',
                             value=f'```{error}```',
                             inline=False)
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
             await ctx.send(embed=embed)
 
-    @commands.command(name='testembed', description='sends an embed, therefore tests the bots functionality')
-    async def testembed(self, ctx):
+    @bridge.bridge_command(name='test_embed', aliases=['testembed'],
+                           description='sends an embed, therefore tests the bots functionality')
+    async def test_embed(self, ctx: bridge.BridgeContext):
         """tests the functionality of the bot by sending an embed"""
         global embedColor
         time = datetime.now()
@@ -225,29 +227,30 @@ class Development(commands.Cog, name='Development', description='contains develo
         embed.add_field(name='Field 3 Title',
                         value='It is inline with Field 2',
                         inline=True)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
+        embed.set_author(name=f'Requested by: {ctx.author}',
                          url='https://www.google.com/',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='testmessage',
-                      description='returns a simple message, therefore tests the bots functionality')
-    async def testmessage(self, ctx):
+    @bridge.bridge_command(name='test_message', aliases=['testmessage'],
+                           description='returns a simple message, therefore tests the bots functionality')
+    async def test_message(self, ctx: bridge.BridgeContext):
         """tests the functionality of the bot by sending a message"""
-        await ctx.send('I am alive!')
+        await ctx.respond('I am alive!')
 
-    @commands.command(name='testtyping', description='makes the typing animation play for a given amount of time')
-    async def testtyping(self, ctx, seconds: int = 1):
+    @bridge.bridge_command(name='test_defer', aliases=['testdefer'],
+                           description='makes the typing animation play for a given amount of time')
+    async def test_defer(self, ctx: bridge.BridgeContext, seconds: int = 1):
         """tests the functionality of the bot by sending a message"""
         # play typing animation for x seconds
-        async with ctx.typing():
-            await asyncio.sleep(seconds)
+        await ctx.defer()
+        await asyncio.sleep(seconds)
 
         # kill typing animation by sending a message
-        await ctx.send(f'Finished playing typing animation for `{seconds}s`.')
+        await ctx.respond(f'Finished playing typing animation for `{seconds}s`.')
 
 
 # cog related functions

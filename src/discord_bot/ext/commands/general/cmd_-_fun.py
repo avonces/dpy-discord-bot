@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import random
 from datetime import datetime
 
@@ -37,14 +37,14 @@ class Entertainment(commands.Cog, name='Entertainment',
 
         self.topic_list = get_list_from_file('../../data/lists/list-topic.txt')
 
-    @commands.command(name='topic', description='totally not a reference to the Kurzgesagt discord')
-    async def topic(self, ctx):
+    @bridge.bridge_command(name='topic', description='totally not a reference to the Kurzgesagt discord')
+    async def topic(self, ctx: bridge.BridgeContext):
         """sends a random, very accurate and totally not offensice topic"""
         topic = random.choice(self.topic_list)
-        await ctx.send(topic)
+        await ctx.respond(topic)
 
-    @commands.command(name='roll', description='roll a dice')
-    async def roll(self, ctx, sides: int = 6):
+    @bridge.bridge_command(name='roll', description='roll a dice')
+    async def roll(self, ctx: bridge.BridgeContext, sides: int = 6):
         """sends a random, very accurate and totally not offensice topic"""
         global embedColor
         time = datetime.now()
@@ -60,13 +60,13 @@ class Entertainment(commands.Cog, name='Entertainment',
         embed.add_field(name='Number',
                         value=f'||`-{number}-`||',
                         inline=False)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='coinflip', description='just like flipping a coin, but digital')
-    async def coinflip(self, ctx):
+    @bridge.bridge_command(name='coinflip', description='just like flipping a coin, but digital')
+    async def coinflip(self, ctx: bridge.BridgeContext):
         """""flips" a coin"""
         global embedColor
         time = datetime.now()
@@ -88,10 +88,10 @@ class Entertainment(commands.Cog, name='Entertainment',
         embed.add_field(name='Side',
                         value=f'||`{side}`||',
                         inline=False)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
 
 # cog related functions

@@ -24,9 +24,10 @@ class Guild(commands.Cog, name='Guild', description='contains guild command grou
     def __init__(self, client):
         self.client = client
 
+    # TODO: Bridge groups not working
     @commands.group(name='guild', description='command group containing guild-related commands')
     @commands.has_permissions(kick_members=True)
-    async def guild(self, ctx):
+    async def guild(self, ctx: commands.Context):
         """creates a command group "dev" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
@@ -35,7 +36,7 @@ class Guild(commands.Cog, name='Guild', description='contains guild command grou
                    description='makes the bot leave the guild which the command is send in')
     @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    async def leave_current(self, ctx):
+    async def leave_current(self, ctx: commands.Context):
         """makes the bot leave the guild which the command is sent in"""
         await ctx.send('**Leaving** this guild...')
 
@@ -44,7 +45,7 @@ class Guild(commands.Cog, name='Guild', description='contains guild command grou
     @guild.command(name='leave_by_id', aliases=['leavebyid'],
                    description='makes the bot leave the guild with the give id')
     @commands.is_owner()
-    async def leave_by_id(self, ctx, guild_id: int):
+    async def leave_by_id(self, ctx: commands.Context, guild_id: int):
         """makes the bot leave the guild with the give id"""
         try:
             guild = self.client.fetch_guild(guild_id=guild_id)
@@ -63,7 +64,7 @@ class Guild(commands.Cog, name='Guild', description='contains guild command grou
     @guild.command(name='leave_by_name', aliases=['leavebyname'],
                    description='makes the bot leave the guild with the given name')
     @commands.is_owner()
-    async def leave_by_name(self, ctx, *, guild_name):
+    async def leave_by_name(self, ctx: commands.Context, *, guild_name: str):
         """makes the bot leave the guild with the given name"""
         guild = discord.utils.get(self.client.guilds, name=str(guild_name))
 

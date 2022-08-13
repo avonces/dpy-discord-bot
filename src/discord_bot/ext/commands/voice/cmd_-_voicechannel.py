@@ -28,7 +28,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @commands.group(name='vc', aliases=['voice_call', 'voicecall'],
                     description='command group containing commands for managing the bot regarding voice calls')
     @commands.guild_only()
-    async def vc(self, ctx):
+    async def vc(self, ctx: commands.Context):
         """command group containing commands for managing the bot regarding voice channels"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
@@ -36,7 +36,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @vc.command(name='join', aliases=['connect'],
                 description='makes the bot join the voice channel that the author is currently connected to')
     @commands.guild_only()
-    async def join(self, ctx):
+    async def join(self, ctx: commands.Context):
         """makes the bot join the voice channel that the author is currently connected to"""
         if ctx.author.voice and ctx.author.voice.channel:
             if not ctx.guild.voice_client:
@@ -49,12 +49,12 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @vc.command(name='leave', aliases=['disconnect'],
                 description='makes the bot leave any voice channel it is connected to')
     @commands.guild_only()
-    async def leave(self, ctx):
+    async def leave(self, ctx: commands.Context):
         """makes the bot leave any voice channel it is connected to"""
         if ctx.guild.voice_client:
             if ctx.guild.voice_client.is_connected():
                 if ctx.author.voice.channel == ctx.guild.voice_client.channel:
-                    await ctx.guild.voice_client.disconnect()
+                    await ctx.guild.voice_client.disconnect(force=True)
                 else:
                     await ctx.send(f'{ctx.author.mention}, you need to be in the same voice channel as me '
                                    'to make me leave.')
@@ -67,7 +67,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
                 description='mutes/ unmutes the given user')
     @commands.guild_only()
     @commands.has_permissions(mute_members=True)
-    async def toggle_mute(self, ctx, member: discord.Member, *, reason):
+    async def toggle_mute(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """mutes/ unmutes the given user"""
         if member.top_role >= ctx.author.top_role:
             await ctx.send(f'{ctx.author.mention}, you can only moderate members '
@@ -85,7 +85,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @vc.command(name='toggle_deafen', aliases=['toggledeafen', 'deafen'], description='deafens/ undeafens the given user')
     @commands.guild_only()
     @commands.has_permissions(deafen_members=True)
-    async def toggle_deafen(self, ctx, member: discord.Member, *, reason):
+    async def toggle_deafen(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """deafens/ undeafens the given user"""
         if member.top_role >= ctx.author.top_role:
             await ctx.send(f'{ctx.author.mention}, you can only moderate members '
@@ -103,7 +103,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @vc.command(name='move', aliases=['move'], description='moves the given user to a given voice call')
     @commands.guild_only()
     @commands.has_permissions(move_members=True)
-    async def move(self, ctx, member: discord.Member, channel: discord.VoiceChannel, *, reason):
+    async def move(self, ctx: commands.Context, member: discord.Member, channel: discord.VoiceChannel, *, reason: str):
         """moves the given user to a given voice call"""
         if member.top_role >= ctx.author.top_role:
             await ctx.send(f'{ctx.author.mention}, you can only moderate members '
@@ -116,7 +116,7 @@ class VoiceCall(commands.Cog, name='VoiceCall',
     @vc.command(name='voice_kick', aliases=['voicekick', 'vkick'], description='kicks the given user from a voice call')
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
-    async def voice_kick(self, ctx, member: discord.Member, *, reason):
+    async def voice_kick(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """kicks the given user from a voice call"""
         if member.top_role >= ctx.author.top_role:
             await ctx.send(f'{ctx.author.mention}, you can only moderate members '

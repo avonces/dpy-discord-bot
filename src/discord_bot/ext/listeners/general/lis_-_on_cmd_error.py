@@ -176,10 +176,9 @@ class CommandErrorHandler(commands.Cog, name='On Command Error Listener',
                                       color=errorEmbedColor)
 
             # format embed
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             url='https://www.google.com/',
-                             icon_url=ctx.author.avatar_url)
-            embed.set_thumbnail(url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}',
+                             icon_url=ctx.author.avatar.url)
+            embed.set_thumbnail(url=ctx.author.avatar.url)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         # finally, send error embed

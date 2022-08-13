@@ -113,7 +113,7 @@ class Hycheck(commands.Cog, name='Hycheck',
 
     @commands.group(name='hycheck', description='command group containing hycheck commands')
     @commands.is_owner()
-    async def hycheck(self, ctx):
+    async def hycheck(self, ctx: commands.Context):
         """creates a command group "hycheck" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
@@ -123,7 +123,7 @@ class Hycheck(commands.Cog, name='Hycheck',
                      description='the loop keeps going, even if errors occur;\n'
                                  'errors will not be printed out for you')
     @commands.is_owner()
-    async def toggle_ignore_exceptions(self, ctx):
+    async def toggle_ignore_exceptions(self, ctx: commands.Context):
         """the loop keeps going, even if errors occur; errors will not be printed out for you"""
         if self.ignore_exceptions:
             self.ignore_exceptions = False
@@ -135,7 +135,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='set_interval', aliases=['setinterval', 'change_interval', 'changeinterval'],
                      description='changes the interval of the check loop to the given time interval')
     @commands.is_owner()
-    async def set_interval(self, ctx, hours: float, minutes: float, seconds: float):
+    async def set_interval(self, ctx: commands.Context, hours: float, minutes: float, seconds: float):
         """changes the interval of the check loop"""
         self.get_online.change_interval(seconds=seconds, minutes=minutes, hours=hours)
         await ctx.send('The interval of the online check loop has been set to: '
@@ -146,7 +146,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='start_requests', aliases=['startrequests'],
                      description='starts the online check loop')
     @commands.is_owner()
-    async def start_requests(self, ctx):
+    async def start_requests(self, ctx: commands.Context):
         """starts the online check loop"""
         global embedColor
         time = datetime.now()
@@ -166,9 +166,9 @@ class Hycheck(commands.Cog, name='Hycheck',
                                   color=embedColor)
 
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
 
         await ctx.send(embed=embed)
 
@@ -176,7 +176,7 @@ class Hycheck(commands.Cog, name='Hycheck',
                      description='stops the online check loop gracefully;\n'
                                  'the current iteration will be finished before stopping')
     @commands.is_owner()
-    async def stop_requests(self, ctx):
+    async def stop_requests(self, ctx: commands.Context):
         """stops the online check loop"""
         global embedColor
         time = datetime.now()
@@ -195,16 +195,16 @@ class Hycheck(commands.Cog, name='Hycheck',
                                   color=embedColor)
 
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
 
         await ctx.send(embed=embed)
 
     @hycheck.command(name='force_stop_requests', aliases=['forcestoprequests'],
                      description='forces the online check loop to stop')
     @commands.is_owner()
-    async def force_stop_requests(self, ctx):
+    async def force_stop_requests(self, ctx: commands.Context):
         """stops the online check loop"""
         global embedColor
         time = datetime.now()
@@ -223,16 +223,16 @@ class Hycheck(commands.Cog, name='Hycheck',
                                   color=embedColor)
 
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
 
         await ctx.send(embed=embed)
 
     @hycheck.command(name='add_friend', aliases=['addfriend'],
                      description='adds a friend to the checklist for the next time the check is executed')
     @commands.is_owner()
-    async def add_friend(self, ctx, player_name):
+    async def add_friend(self, ctx: commands.Context, player_name: str):
         """adds a friend to the checklist for the next time the check is executed"""
         player_name = str(player_name).strip()
 
@@ -257,7 +257,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='add_friends', aliases=['addfriends'],
                      description='adds multiple friends to the checklist for the next time the check is executed')
     @commands.is_owner()
-    async def add_friends(self, ctx, *, player_names):
+    async def add_friends(self, ctx: commands.Context, *, player_names: str):
         player_name_list = player_names.split()
 
         for player_name in player_name_list:
@@ -284,7 +284,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='remove_friend', aliases=['removefriend'],
                      description='removes a friend to the checklist for the next time the check is executed')
     @commands.is_owner()
-    async def remove_friend(self, ctx, player_name):
+    async def remove_friend(self, ctx: commands.Context, player_name: str):
         """removes a friend from the checklist for the next time the check is executed"""
         for player_uuid, player_data in self.friends.items():
             if player_data['name'] == player_name:
@@ -298,7 +298,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='remove_friends', aliases=['removefriends'],
                      description='removes multiple friends from the checklist for the next time the check is executed')
     @commands.is_owner()
-    async def remove_friends(self, ctx, *, player_names):
+    async def remove_friends(self, ctx: commands.Context, *, player_names: str):
         player_name_list = player_names.split()
 
         for player_name in player_name_list:
@@ -318,7 +318,7 @@ class Hycheck(commands.Cog, name='Hycheck',
     @hycheck.command(name='checklist',
                      description='sends a list of all the players in the checklist and their current status')
     @commands.is_owner()
-    async def checklist(self, ctx):
+    async def checklist(self, ctx: commands.Context):
         """sends a list of all the players in the checklist and their current status"""
         global embedColor
         time = datetime.now()
@@ -328,9 +328,9 @@ class Hycheck(commands.Cog, name='Hycheck',
                               description='all players in the checklist and their current status',
                               color=embedColor)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
 
         if self.friends:
             players_online_offline = {'online': [], 'offline': []}

@@ -4,7 +4,8 @@ import logging
 import dotenv
 import discord
 from datetime import datetime
-from discord.ext import commands
+from discord.ext import commands, bridge
+from discord.commands import Option
 from youtube_dl import YoutubeDL
 
 # logging
@@ -94,8 +95,8 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                 self.voice_client = await self.music_queue[0][1].connect()
                 # can not connect
                 if not self.voice_client:
-                    await ctx.send(f'{ctx.author.mention}, I was not able to connect to the given voice channel.\n'
-                                   f'(Voice Channel: `{self.music_queue[0][1]}`)')
+                    await ctx.respond(f'{ctx.author.mention}, I was not able to connect to the given voice channel.\n'
+                                      f'(Voice Channel: `{self.music_queue[0][1]}`)')
                     return
 
             else:
@@ -127,13 +128,13 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # play_local
     # ------
 
-    @commands.command(name='play_local', help='appends a local audio file to the queue and starts playing')
+    @bridge.bridge_command(name='play_local', help='appends a local audio file to the queue and starts playing')
     @commands.guild_only()
     @commands.is_owner()
-    async def play_local(self, ctx, *, path_to_audio_file: str):
+    async def play_local(self, ctx: bridge.BridgeContext, *, path_to_audio_file: str):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
-            await ctx.send(
+            await ctx.respond(
                 f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!')
 
         else:
@@ -141,7 +142,7 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                 song = {'source': path_to_audio_file, 'title': os.path.basename(path_to_audio_file)}
 
                 self.music_queue.append([song, ctx.author.voice.channel])
-                await ctx.send(f'Appended to the queue: **{song["title"]}**')
+                await ctx.respond(f'Appended to the queue: **{song["title"]}**')
 
                 if self.voice_client:
                     if self.voice_client.is_paused():
@@ -156,26 +157,28 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                     await self.play_music(ctx)
 
             else:
-                await ctx.send(f'{ctx.author.mention}, I was not able to find a valid audio file '
-                               'in the given location.')
+                await ctx.respond(f'{ctx.author.mention}, I was not able to find a valid audio file '
+                                  'in the given location.')
 
     # ------
     # play, resume, pause, stop
     # ------
 
-    @commands.command(name='play', help='appends the soundtrack of a youtube video to the queue and starts playing')
+    @bridge.bridge_command(name='play', help='appends the soundtrack of a youtube video to the queue and starts playing'
+                           )
     @commands.guild_only()
-    async def play(self, ctx, *, query):
+    async def play(self, ctx: bridge.BridgeContext, *, query: str):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
-            await ctx.send(f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!')
+            await ctx.respond(f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!'
+                              )
 
         else:
             song = self.search_yt(query)
 
             if song:
                 self.music_queue.append([song, ctx.author.voice.channel])
-                await ctx.send(f'Appended to the queue: **{song["title"]}**')
+                await ctx.respond(f'Appended to the queue: **{song["title"]}**')
 
                 if self.voice_client:
                     if self.voice_client.is_paused():
@@ -190,27 +193,27 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                     await self.play_music(ctx)
 
             else:
-                await ctx.send(f'{ctx.author.mention}, I was not able to find a YouTube video corresponding to '
-                               'the given search query. Maybe it is a livestream or playlist. I can not play those.')
+                await ctx.respond(f'{ctx.author.mention}, I was not able to find a YouTube video corresponding to '
+                                  'the given search query. Maybe it is a livestream or playlist. I can not play those.')
 
-    @commands.command(name='resume', help='if the bot has been paused, start playing from where it did')
+    @bridge.bridge_command(name='resume', help='if the bot has been paused, start playing from where it did')
     @commands.guild_only()
-    async def resume(self, ctx):
+    async def resume(self, ctx: bridge.BridgeContext):
         if self.voice_client:
             if self.voice_client.is_paused():
                 self.voice_client.resume()
 
-    @commands.command(name='pause', help='if the bot is currently playing, pause it')
+    @bridge.bridge_command(name='pause', help='if the bot is currently playing, pause it')
     @commands.guild_only()
-    async def pause(self, ctx):
+    async def pause(self, ctx: bridge.BridgeContext):
         if self.voice_client:
             if self.voice_client.is_playing():
                 self.voice_client.pause()
 
-    @commands.command(name='stop', help='make the bot stop playing any music, '
-                                        'clear the queue and leave the voice channel')
+    @bridge.bridge_command(name='stop', help='make the bot stop playing any music, '
+                                             'clear the queue and leave the voice channel')
     @commands.guild_only()
-    async def stop(self, ctx):
+    async def stop(self, ctx: bridge.BridgeContext):
         if self.voice_client:
             if self.voice_client.is_playing():
                 self.voice_client.stop()
@@ -223,43 +226,43 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
     # queue, skip, clear_queue, display_queue
     # ------
 
-    @commands.command(name='queue', help='appends the soundtrack of a youtube video to the queue')
+    @bridge.bridge_command(name='queue', help='appends the soundtrack of a youtube video to the queue')
     @commands.guild_only()
-    async def queue(self, ctx, *, query):
+    async def queue(self, ctx: bridge.BridgeContext, *, query: str):
         if not ctx.author.voice.channel:
             # you need to be connected so that the bot knows where to go
-            await ctx.send(f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!')
+            await ctx.respond(f'{ctx.author.mention}, you need to be connected to a voice channel, to use this command!')
 
         else:
             song = self.search_yt(query)
 
             if isinstance(song, bool):
-                await ctx.send(f'{ctx.author.mention}, I was not able to find a YouTube video corresponding to '
-                               'the given search query. Maybe it is a livestream or playlist. I can not play those.')
+                await ctx.respond(f'{ctx.author.mention}, I was not able to find a YouTube video corresponding to '
+                                  'the given search query. Maybe it is a livestream or playlist. I can not play those.')
 
             else:
                 self.music_queue.append([song, ctx.author.voice.channel])
-                await ctx.send(f'Appended to the queue: **{song["title"]}**')
+                await ctx.respond(f'Appended to the queue: **{song["title"]}**')
 
-    @commands.command(name='skip', help='Skips the current song being played')
+    @bridge.bridge_command(name='skip', help='Skips the current song being played')
     @commands.guild_only()
-    async def skip(self, ctx):
+    async def skip(self, ctx: bridge.BridgeContext):
         if self.voice_client:
             self.voice_client.stop()
             # try to play next in the queue if it exists
             await self.play_music(ctx)
 
-    @commands.command(name='clear_queue', aliases=['clearqueue'], help='clears the queue')
+    @bridge.bridge_command(name='clear_queue', aliases=['clearqueue'], help='clears the queue')
     @commands.guild_only()
-    async def clear_queue(self, ctx):
+    async def clear_queue(self, ctx: bridge.BridgeContext):
         self.music_queue = []
 
-        await ctx.send('The queue has been cleared.')
+        await ctx.respond('The queue has been cleared.')
 
-    @commands.command(name='display_queue', aliases=['displayqueue'],
-                      help='displays up to 10 songs that will be played next')
+    @bridge.bridge_command(name='display_queue', aliases=['displayqueue'],
+                           help='displays up to 10 songs that will be played next')
     @commands.guild_only()
-    async def display_queue(self, ctx):
+    async def display_queue(self, ctx: bridge.BridgeContext):
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
@@ -290,19 +293,19 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                                   color=embedColor)
 
         embed.set_footer(text=f'BerbBot - {formatted_time}')
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=ctx.author.avatar.url)
 
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
     # ------
     # volume
     # ------
 
-    @commands.command(name='volume', help='changes the audio sources volume')
+    @bridge.bridge_command(name='volume', help='changes the audio sources volume')
     @commands.guild_only()
-    async def volume(self, ctx, new_volume: int):
+    async def volume(self, ctx: bridge.BridgeContext, new_volume: int):
         """changes the audio sources volume"""
         if self.voice_client:
             if self.voice_client.source:
@@ -312,10 +315,10 @@ class Music(commands.Cog, name='Music', description='contains commands for playi
                     self.volume = new_volume_float
                     self.voice_client.source.volume = new_volume_float
 
-                    await ctx.channel.send(f'Set the volume to **{new_volume}%**.')
+                    await ctx.respond(f'Set the volume to **{new_volume}%**.')
 
                 else:
-                    await ctx.channel.send('Please enter a volume between 0 and 100.')
+                    await ctx.respond('Please enter a volume between 0 and 100.')
 
 
 # cog related functions
@@ -326,5 +329,5 @@ def setup(client):
 
 
 def teardown(client):
-    """send information when extension is being unloaded"""
+    """respond information when extension is being unloaded"""
     logger.info(f'unloading extension: {os.path.basename(__file__)}')

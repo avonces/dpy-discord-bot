@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import requests
 from datetime import datetime
 
@@ -27,44 +27,46 @@ class Joke(commands.Cog, name='Joke', description='contains joke command'):
 
         self.request_session = requests.Session()
 
-    @commands.command(name='joke', description='sends a random joke')
-    async def joke(self, ctx):
+    # @commands.command(name='joke', description='sends a random joke')
+    @bridge.bridge_command(name='joke', description='sends a random joke')
+    async def joke(self, ctx: bridge.BridgeContext):
         """sends a random joke"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
 
-        async with ctx.typing():
-            # do request
-            request_url = 'https://apis.duncte123.me/joke'
-            headers = {'User-Agent': str(self.client.user)}
-            data = self.request_session.get(request_url, headers=headers).json()
+        await ctx.defer()
 
-            # if request succeeded, send embed with image
-            if data['success']:
-                joke_url = data['data']['url']
-                title = data['data']['title']
-                body = data['data']['body']
+        # do request
+        request_url = 'https://apis.duncte123.me/joke'
+        headers = {'User-Agent': str(self.client.user)}
+        data = self.request_session.get(request_url, headers=headers).json()
 
-                embed = discord.Embed(title='Joke',
-                                      url=joke_url,
-                                      color=embedColor)
-                embed.add_field(name=f'------\n'
-                                     f'{title}',
-                                value=f'------\n'
-                                      f'{body}',
-                                inline=False)
+        # if request succeeded, send embed with image
+        if data['success']:
+            joke_url = data['data']['url']
+            title = data['data']['title']
+            body = data['data']['body']
 
-            else:
-                embed = discord.Embed(title='Joke',
-                                      description='Unfortunately, an api error occurred.',
-                                      color=embedColor)
+            embed = discord.Embed(title='Joke',
+                                  url=joke_url,
+                                  color=embedColor)
+            embed.add_field(name=f'------\n'
+                                 f'{title}',
+                            value=f'------\n'
+                                  f'{body}',
+                            inline=False)
 
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
-            embed.set_footer(text=f'BerbBot - {formatted_time}')
+        else:
+            embed = discord.Embed(title='Joke',
+                                  description='Unfortunately, an api error occurred.',
+                                  color=embedColor)
 
-        await ctx.send(embed=embed)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_footer(text=f'BerbBot - {formatted_time}')
+
+        await ctx.respond(embed=embed)
 
 
 # cog related functions

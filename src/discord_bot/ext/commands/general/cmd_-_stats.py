@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import sqlite3
 from datetime import datetime
 
@@ -24,13 +24,16 @@ class Statistics(commands.Cog, name='Statistics', description='contains statisti
     def __init__(self, client):
         self.client = client
 
-    @commands.command(name='userstats', description='sends the most important user statistics '
-                                                    'for a given discord user on this server')
-    async def userstats(self, ctx, member: discord.Member):
+    @bridge.bridge_command(name='user_stats', aliases=['userstats'], description='sends the most important user '
+                                                                                 'statistics for a given discord user '
+                                                                                 'on this server')
+    async def user_stats(self, ctx: bridge.BridgeContext, member: discord.Member):
         """sends user statistics for a given user"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
+
+        await ctx.defer()
 
         guild_id = ctx.guild.id
         user_id = member.id
@@ -61,9 +64,9 @@ class Statistics(commands.Cog, name='Statistics', description='contains statisti
         embed = discord.Embed(title='User Statistics',
                               description=f'Overall discord user statistics for **{member.name}**\n',
                               color=embedColor)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         # add content
@@ -104,23 +107,26 @@ class Statistics(commands.Cog, name='Statistics', description='contains statisti
                         inline=False)
 
         # send embed
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
-    @commands.command(name='serverstats', description='sends the most important server statistics '
-                                                      'for a this discord server')
+    @bridge.bridge_command(name='server_stats', aliases=['serverstats'], description='sends the most important server '
+                                                                                     'statistics for a this discord '
+                                                                                     'server')
     @commands.guild_only()
-    async def serverstats(self, ctx):
+    async def server_stats(self, ctx: bridge.BridgeContext):
         """sends user statistics for a given user"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
 
+        await ctx.defer()
+
         # create embed
         embed = discord.Embed(title='Server Statistics',
                               description=f'Overall server statistics for **{ctx.guild.name}**\n',
                               color=embedColor)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
         embed.set_thumbnail(url=ctx.guild.icon_url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
@@ -145,7 +151,7 @@ class Statistics(commands.Cog, name='Statistics', description='contains statisti
                         inline=True)
 
         # send embed
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
 
 # cog related functions

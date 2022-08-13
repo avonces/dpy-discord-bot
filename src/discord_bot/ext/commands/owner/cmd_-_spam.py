@@ -2,7 +2,7 @@
 import os
 import logging
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 
 # logging
 """create logger by inheriting configuration from root logger"""
@@ -15,25 +15,28 @@ class Spam(commands.Cog, name='Spam', description='contains commands for spammin
     def __init__(self, client):
         self.client = client
 
-    @commands.command(name='spamuser', description='spams a given user with a given amount of a given message')
+    @bridge.bridge_command(name='spam_user', aliases=['spamuser'],
+                           description='spams a given user with a given amount of a given message')
     @commands.is_owner()
-    async def spamuser(self, ctx, member: discord.Member, amount: int = 5, *, message):
+    async def spam_user(self, ctx: bridge.BridgeContext, member: discord.Member, amount: int = 5, *, message: str):
         """spams a given user with a given amount of a given message"""
         async with member.typing():
             for i in range(0, amount):
                 await member.send(message)
 
-        await ctx.send(f'Successfully spammed {member.mention} `{amount}` times with your message.')
+        await ctx.respond(f'Successfully spammed {member.mention} `{amount}` times with your message.')
 
-    @commands.command(name='spamchannel', description='spams a given message a given amount in the current channel')
+    @bridge.bridge_command(name='spam_channel', aliases=['spamchannel'],
+                           description='spams a given message a given amount in the current channel')
     @commands.is_owner()
-    async def spamchannel(self, ctx, amount: int = 5, *, message):
+    async def spam_channel(self, ctx: bridge.BridgeContext, amount: int = 5, *, message: str):
         """spams a given user with a given amount of a given message"""
-        async with ctx.typing():
-            for i in range(0, amount):
-                await ctx.send(message)
+        await ctx.defer()
 
-        await ctx.send(f'Successfully spammed {ctx.channel.mention} `{amount}` times with your message.')
+        for i in range(0, amount):
+            await ctx.send(message)
+
+        await ctx.respond(f'Successfully spammed {ctx.channel.mention} `{amount}` times with your message.')
 
 
 # cog related functions

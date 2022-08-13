@@ -2,7 +2,7 @@
 import os
 import logging
 import dotenv
-from discord.ext import commands
+from discord.ext import commands, bridge
 import ast
 from multiprocessing.connection import Listener
 
@@ -76,20 +76,27 @@ class BotCommunication(commands.Cog, name='Bot Communication',
         self.client = client
         self.connection_handler = ConnectionHandler()
 
-    @commands.command(name='establish_connection', aliases=['estconn'],
+    @bridge.bridge_command(name='establish_connection', aliases=['estconn'],
                       description='establish a connection to available subbots')
     @commands.is_owner()
-    async def establish_connection(self, ctx):
-        if self.connection_handler.establish_connection():
-            await ctx.send('connection established')
-        else:
-            await ctx.send('failed establishing connection')
+    async def establish_connection(self, ctx: bridge.BridgeContext):
+        await ctx.defer()
 
-    @commands.command(name='send_subbot_command', aliases=['sendsbcmd'], description='send commands to the subbots')
+        if self.connection_handler.establish_connection():
+            await ctx.respond('connection established')
+        else:
+            await ctx.respond('failed establishing connection')
+
+    @bridge.bridge_command(name='send_subbot_command', aliases=['sendsbcmd'],
+                           description='send commands to the subbots')
     @commands.is_owner()
-    async def send_subbot_command(self, ctx, amount, *, command):
+    async def send_subbot_command(self, ctx: bridge.BridgeContext, amount: str = '1', *, command: str):
+        await ctx.defer()
+
         subbot_command = f'{ctx.channel.id} {ctx.author.id} {command}'
         self.connection_handler.send_amount(amount, subbot_command)
+
+        await ctx.respond(f'The subbot command `{command}` has been send to **`{amount}`** subbots.')
 
 
 # cog related functions

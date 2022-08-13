@@ -39,15 +39,16 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
             stale_if_error=True,                    # In case of request errors, use stale cache data if possible
         )
 
-    @commands.group(name='renderskin', aliases=['rnsn'],
+    # TODO: Bridge groups not working
+    @commands.group(name='render_skin', aliases=['renderskin', 'rnsn'],
                     description='command group containing commands for rendering parts of a minecraft skin')
-    async def renderskin(self, ctx):
+    async def render_skin(self, ctx: commands.Context):
         """creates a command group "renderskin" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
 
-    @renderskin.command(name='face', description='render the face of a minecraft player')
-    async def face(self, ctx: commands.Context, player_name):
+    @render_skin.command(name='face', description='render the face of a minecraft player')
+    async def face(self, ctx: commands.Context, player_name: str):
         """send a picture of a minecraft player's face"""
         try:
             async with ctx.typing():
@@ -60,8 +61,8 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
             await ctx.send('This player does not exist or an API-Error occurred.')
             logger.exception(e)
 
-    @renderskin.command(name='head', description='render the head of a minecraft player')
-    async def head(self, ctx: commands.Context, player_name):
+    @render_skin.command(name='head', description='render the head of a minecraft player')
+    async def head(self, ctx: commands.Context, player_name: str):
         """send a picture of a minecraft player's head"""
         try:
             async with ctx.typing():
@@ -74,8 +75,8 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
             await ctx.send('This player does not exist or an API-Error occurred.')
             logger.exception(e)
 
-    @renderskin.command(name='body', description='render the body of a minecraft player')
-    async def body(self, ctx: commands.Context, player_name):
+    @render_skin.command(name='body', description='render the body of a minecraft player')
+    async def body(self, ctx: commands.Context, player_name: str):
         """send a picture of a minecraft player's body"""
         try:
             async with ctx.typing():
@@ -88,15 +89,16 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
             await ctx.send('This player does not exist or an API-Error occurred.')
             logger.exception(e)
 
+    # TODO: Bridge groups not working
     @commands.group(name='hypixel', aliases=['hypx'],
                     description='command group containing commands for displaying hypixel player stats')
-    async def hypixel(self, ctx):
+    async def hypixel(self, ctx: commands.Context):
         """creates a command group "hypixel" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
 
     @hypixel.command(name='general', aliases=['overall'], description='sends general statistics for a hypixel player')
-    async def general(self, ctx, hypixel_player_name):
+    async def general(self, ctx: commands.Context, hypixel_player_name: str):
         """sends an embed containing general statistics for a hypixel player"""
 
         global hypixelApiKey
@@ -112,7 +114,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
                                   description=f'Overall hypixel player statistics for "{hypixel_player_name}"',
                                   color=embedColor)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
-            embed.set_author(name=f'Requested by: {ctx.message.author}', icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}', icon_url=ctx.author.avatar.url)
 
             try:
                 player_uuid_url = f'https://api.mojang.com/users/profiles/minecraft/{hypixel_player_name}'
@@ -205,7 +207,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
 
     @hypixel.command(name='guild_member', aliases=['guildmember', 'gm'],
                      description='sends statistics for a hypixel guild member')
-    async def guild_member(self, ctx, hypixel_player_name):
+    async def guild_member(self, ctx: commands.Context, hypixel_player_name: str):
         """sends an embed containing statistics for a hypixel guild member"""
         global hypixelApiKey
 
@@ -220,7 +222,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
                                   description=f'Overall hypixel guild-member statistics for **"{hypixel_player_name}"**',
                                   color=embedColor)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
-            embed.set_author(name=f'Requested by: {ctx.message.author}', icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}', icon_url=ctx.author.avatar.url)
 
             try:
                 player_uuid_url = f'https://api.mojang.com/users/profiles/minecraft/{hypixel_player_name}'
@@ -294,7 +296,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
 
     @hypixel.command(name='bed_wars', aliases=['bedwars', 'bw'],
                      description='sends bedwars statistics for a hypixel player')
-    async def bed_wars(self, ctx, hypixel_player_name):
+    async def bed_wars(self, ctx: commands.Context, hypixel_player_name: str):
         """sends an embed containing general statistics for a hypixel player"""
         global hypixelApiKey
 
@@ -309,7 +311,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
                                   description=f'Overall hypixel bedwars statistics for {hypixel_player_name}',
                                   color=embedColor)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
-            embed.set_author(name=f'Requested by: {ctx.message.author}', icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}', icon_url=ctx.author.avatar.url)
 
             try:
                 player_uuid_url = f'https://api.mojang.com/users/profiles/minecraft/{hypixel_player_name}'
@@ -395,7 +397,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
 
     @hypixel.command(name='sky_wars', aliases=['skywars', 'sw'],
                      description='sends skywars statistics for a hypixel player')
-    async def sky_wars(self, ctx, hypixel_player_name):
+    async def sky_wars(self, ctx: commands.Context, hypixel_player_name: str):
         """sends an embed containing general statistics for a hypixel player"""
         global hypixelApiKey
 
@@ -410,7 +412,7 @@ class Minecraft(commands.Cog, name='Hypixel', description='contains hypixel rela
                                   description=f'Overall hypixel skywars statistics for {hypixel_player_name}',
                                   color=embedColor)
             embed.set_footer(text=f'BerbBot - {formatted_time}')
-            embed.set_author(name=f'Requested by: {ctx.message.author}', icon_url=ctx.author.avatar_url)
+            embed.set_author(name=f'Requested by: {ctx.author}', icon_url=ctx.author.avatar.url)
 
             try:
                 player_uuid_url = f'https://api.mojang.com/users/profiles/minecraft/{hypixel_player_name}'

@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import requests
 from datetime import datetime
 
@@ -27,63 +27,64 @@ class Animal(commands.Cog, name='Animal', description='contains animal command')
 
         self.request_session = requests.Session()
 
-    @commands.command(name='animal', description='sends a random picture of a given animal type')
-    async def animal(self, ctx, animal_type):
+    @bridge.bridge_command(name='animal', description='sends a random picture of a given animal type')
+    async def animal(self, ctx: bridge.BridgeContext, animal_type: str):
         """sends a random picture of a given animal type"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
 
-        async with ctx.typing():
-            valid_animal_types = ['alpaca',
-                                  'bird',
-                                  'camel',
-                                  'cat',
-                                  'discord-monster',
-                                  'dog',
-                                  'duck',
-                                  'fox',
-                                  'lizard',
-                                  'llama',
-                                  'panda',
-                                  'seal',
-                                  'wolf']
+        await ctx.defer()
 
-            if animal_type in valid_animal_types:
-                # do request
-                request_url = f'https://apis.duncte123.me/animal/{animal_type}'
-                headers = {'User-Agent': str(self.client.user)}
-                data = self.request_session.get(request_url, headers=headers).json()
+        valid_animal_types = ['alpaca',
+                              'bird',
+                              'camel',
+                              'cat',
+                              'discord-monster',
+                              'dog',
+                              'duck',
+                              'fox',
+                              'lizard',
+                              'llama',
+                              'panda',
+                              'seal',
+                              'wolf']
 
-                # if request succeeded, send embed with image
-                if data['success']:
-                    animal_type_capitalized = animal_type.capitalize()
-                    image_url = data['data']['file']
+        if animal_type in valid_animal_types:
+            # do request
+            request_url = f'https://apis.duncte123.me/animal/{animal_type}'
+            headers = {'User-Agent': str(self.client.user)}
+            data = self.request_session.get(request_url, headers=headers).json()
 
-                    embed = discord.Embed(title=animal_type_capitalized,
-                                          color=embedColor)
-                    embed.set_image(url=image_url)
+            # if request succeeded, send embed with image
+            if data['success']:
+                animal_type_capitalized = animal_type.capitalize()
+                image_url = data['data']['file']
 
-                else:
-                    embed = discord.Embed(title='Animal',
-                                          description='Unfortunately, an API-Error occurred.',
-                                          color=embedColor)
+                embed = discord.Embed(title=animal_type_capitalized,
+                                      color=embedColor)
+                embed.set_image(url=image_url)
 
             else:
                 embed = discord.Embed(title='Animal',
-                                      description='Please enter a valid animal type!',
+                                      description='Unfortunately, an API-Error occurred.',
                                       color=embedColor)
-                embed.add_field(name='Valid Animal Types',
-                                value='alpaca, bird, camel, cat, discord-monster, dog, duck, fox, lizard, llama, '
-                                      'panda, seal, wolf',
-                                inline=False)
 
-            # configure and send embed
-            embed.set_author(name=f'Requested by: {ctx.message.author}',
-                             icon_url=ctx.author.avatar_url)
-            embed.set_footer(text=f'BerbBot - {formatted_time}')
+        else:
+            embed = discord.Embed(title='Animal',
+                                  description='Please enter a valid animal type!',
+                                  color=embedColor)
+            embed.add_field(name='Valid Animal Types',
+                            value='alpaca, bird, camel, cat, discord-monster, dog, duck, fox, lizard, llama, '
+                                  'panda, seal, wolf',
+                            inline=False)
 
-        await ctx.send(embed=embed)
+        # configure and send embed
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_footer(text=f'BerbBot - {formatted_time}')
+
+        await ctx.respond(embed=embed)
 
 
 # cog related functions

@@ -3,7 +3,7 @@ import os
 import logging
 import dotenv
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import sqlite3
 import ast
 from datetime import datetime
@@ -27,19 +27,22 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
     def __init__(self, client):
         self.client = client
 
+    # TODO: Bridge groups not working
     @commands.group(name='prefix', description='command group containing prefix-related commands')
-    async def prefix(self, ctx):
+    async def prefix(self, ctx: commands.Context):
         """creates command group "prefix" for using subcommands"""
         if ctx.invoked_subcommand is None:
             await ctx.send('Please pass a valid subcommand.')
 
     @prefix.command(name='get', description='gets berb-bot prefixes for the current server and prints them out')
     @commands.guild_only()
-    async def get(self, ctx):
+    async def get(self, ctx: commands.Context):
         """gets prefix entries for a certain guild and prints it out"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
+
+        # await ctx.defer()
 
         # get bot prefixes for embed
         complete_prefix_list = self.client.command_prefix(self.client, ctx.message)
@@ -52,9 +55,9 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
         embed.add_field(name='Berb-Bot Prefixes:',
                         value=prefix_string,
                         inline=False)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         await ctx.send(embed=embed)
@@ -62,15 +65,17 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
     @prefix.command(name='set', description='sets custom berb-bot prefixes for the current discord server')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    async def set(self, ctx, *, prefixes_seperated_by_spaces):
+    async def set(self, ctx: commands.Context, *, prefixes: str):
         """sets custom prefixes for certain guild"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
 
+        # await ctx.defer()
+
         # needed data
         guild_id = ctx.guild.id
-        prefix_list = prefixes_seperated_by_spaces.split(' ')
+        prefix_list = prefixes.split(' ')
 
         # connect to "databank.db" and create cursor
         connection = sqlite3.connect('../../data/databank.db')
@@ -103,9 +108,9 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
         embed.add_field(name='New Berb-Bot Prefixes:',
                         value=prefix_string,
                         inline=False)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         await ctx.send(embed=embed)
@@ -113,11 +118,13 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
     @prefix.command(name='reset', description='deletes any custom berb-bot prefixes for the current discord server')
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    async def reset(self, ctx):
+    async def reset(self, ctx: commands.Context):
         """deletes prefix entries for a certain guild"""
         global embedColor
         time = datetime.now()
         formatted_time = time.strftime('%H:%M')
+
+        # await ctx.defer()
 
         # needed data
         guild_id = ctx.guild.id
@@ -148,9 +155,9 @@ class Prefix(commands.Cog, name='Prefix', description='contains prefix command g
         embed.add_field(name='Default Berb-Bot Prefixes:',
                         value=prefix_string,
                         inline=False)
-        embed.set_author(name=f'Requested by: {ctx.message.author}',
-                         icon_url=ctx.author.avatar_url)
-        embed.set_thumbnail(url=self.client.user.avatar_url)
+        embed.set_author(name=f'Requested by: {ctx.author}',
+                         icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=self.client.user.avatar.url)
         embed.set_footer(text=f'BerbBot - {formatted_time}')
 
         await ctx.send(embed=embed)
